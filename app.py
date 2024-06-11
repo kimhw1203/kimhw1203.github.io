@@ -19,6 +19,23 @@ grade_mapping = {
 
 last_submit_time = 0
 
+def check_bingo(board):
+    bingo_count = 0
+    # Check rows
+    for row in range(5):
+        if all(board[row * 5 + col] for col in range(5)):
+            bingo_count += 1
+    # Check columns
+    for col in range(5):
+        if all(board[row * 5 + col] for row in range(5)):
+            bingo_count += 1
+    # Check diagonals
+    if all(board[i * 5 + i] for i in range(5)):
+        bingo_count += 1
+    if all(board[i * 5 + (4 - i)] for i in range(5)):
+        bingo_count += 1
+    return bingo_count
+
 @app.route('/submit', methods=['POST'])
 def submit():
     global last_submit_time
@@ -32,14 +49,19 @@ def submit():
 
     last_submit_time = current_time
 
-    student_grade = 'B'
+    student_grade = 'B'  # 예제에서는 B등급 학생으로 고정
 
     correct_count = sum(1 for i, answer in enumerate(answers) if answer.strip().lower() == correct_answers[i].lower())
 
     if student_grade in grade_mapping:
         correct_count += grade_mapping[student_grade]
 
-    return jsonify({'correct_count': correct_count})
+    # Create a board to check for bingo
+    board = [answer.strip().lower() == correct_answers[i].lower() for i, answer in enumerate(answers)]
+    
+    bingo_count = check_bingo(board)
+
+    return jsonify({'correct_count': correct_count, 'bingo_count': bingo_count})
 
 if __name__ == '__main__':
     app.run(debug=True)
