@@ -1,3 +1,15 @@
+const gradeMapping = {
+    1: 'D+',
+    2: 'C0',
+    3: 'C+',
+    4: 'B0',
+    5: 'B+',
+    6: 'A0',
+    7: 'A+'
+};
+
+let lastSubmitTime = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('bingo-board');
 
@@ -18,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         lastSubmitTime = currentTime;
 
+        const studentId = document.getElementById('student-id').value.trim();
         const answers = [];
         questions.forEach((_, index) => {
             answers.push(document.getElementById(`answer-${index}`).value.trim());
@@ -29,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                student_id: 'student123',
+                student_id: studentId,
                 answers: answers
             })
         })
@@ -38,7 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.error) {
                 alert(data.error);
             } else {
-                document.getElementById('feedback').innerHTML = `You got ${data.correct_count} correct answers.`;
+                const feedback = document.getElementById('feedback');
+                feedback.innerHTML = `You got ${data.correct_count} correct answers.<br>`;
+                if (data.bingo_count in gradeMapping) {
+                    feedback.innerHTML += `You achieved ${data.bingo_count} bingo(s): ${gradeMapping[data.bingo_count]}`;
+                } else {
+                    feedback.innerHTML += `You achieved ${data.bingo_count} bingo(s).`;
+                }
             }
         });
     });
