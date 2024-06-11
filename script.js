@@ -1,18 +1,27 @@
 const questions = [
-    'Question 1', 'Question 2', 'Question 3', 'Question 4', 'Question 5',
-    'Question 6', 'Question 7', 'Question 8', 'Question 9', 'Question 10',
-    'Question 11', 'Question 12', 'Question 13', 'Question 14', 'Question 15',
-    'Question 16', 'Question 17', 'Question 18', 'Question 19', 'Question 20',
-    'Question 21', 'Question 22', 'Question 23', 'Question 24', 'Question 25'
+    'What is 5 + 5?', 'What is 12 - 5?', 'What is 7 * 3?', 'What is 20 / 4?', 'What is 15 % 4?',
+    'What is 3 + 8?', 'What is 14 - 6?', 'What is 8 * 2?', 'What is 16 / 2?', 'What is 18 % 5?',
+    'What is 2 + 3?', 'What is 13 - 7?', 'What is 6 * 2?', 'What is 24 / 6?', 'What is 17 % 3?',
+    'What is 4 + 6?', 'What is 11 - 8?', 'What is 9 * 2?', 'What is 30 / 5?', 'What is 22 % 4?',
+    'What is 1 + 4?', 'What is 15 - 9?', 'What is 5 * 3?', 'What is 18 / 3?', 'What is 19 % 6?'
 ];
 
 const correctAnswers = [
-    'Answer1', 'Answer2', 'Answer3', 'Answer4', 'Answer5',
-    'Answer6', 'Answer7', 'Answer8', 'Answer9', 'Answer10',
-    'Answer11', 'Answer12', 'Answer13', 'Answer14', 'Answer15',
-    'Answer16', 'Answer17', 'Answer18', 'Answer19', 'Answer20',
-    'Answer21', 'Answer22', 'Answer23', 'Answer24', 'Answer25'
+    { answer: 10, tolerance: 1 }, { answer: 7, tolerance: 1 }, { answer: 21, tolerance: 2 }, { answer: 5, tolerance: 0.5 }, { answer: 3, tolerance: 0.2 },
+    { answer: 11, tolerance: 1 }, { answer: 8, tolerance: 1 }, { answer: 16, tolerance: 2 }, { answer: 8, tolerance: 0.5 }, { answer: 3, tolerance: 0.2 },
+    { answer: 5, tolerance: 0.5 }, { answer: 6, tolerance: 1 }, { answer: 12, tolerance: 1 }, { answer: 4, tolerance: 0.5 }, { answer: 2, tolerance: 0.2 },
+    { answer: 10, tolerance: 1 }, { answer: 3, tolerance: 0.5 }, { answer: 18, tolerance: 1 }, { answer: 6, tolerance: 0.5 }, { answer: 2, tolerance: 0.2 },
+    { answer: 5, tolerance: 0.5 }, { answer: 6, tolerance: 1 }, { answer: 15, tolerance: 1 }, { answer: 6, tolerance: 0.5 }, { answer: 1, tolerance: 0.2 }
 ];
+
+// 학번에 따른 등급 데이터 (예시)
+const studentGrades = {
+    "student1": 1,
+    "student2": 2,
+    "student3": 3,
+    "student4": 4,
+    "student5": 5
+};
 
 const gradeMapping = {
     1: 'D+',
@@ -48,6 +57,23 @@ function checkBingo(board) {
     return bingoCount;
 }
 
+function isWithinTolerance(userAnswer, correctAnswer, tolerance) {
+    return Math.abs(userAnswer - correctAnswer) <= tolerance;
+}
+
+function canSubmit() {
+    const lastSubmitTime = localStorage.getItem('lastSubmitTime');
+    if (!lastSubmitTime) {
+        return true;
+    }
+    const currentTime = Date.now();
+    return (currentTime - lastSubmitTime) >= 60000; // 60초 제한
+}
+
+function updateLastSubmitTime() {
+    localStorage.setItem('lastSubmitTime', Date.now());
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('bingo-board');
 
@@ -60,39 +86,56 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quiz-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
+        if (!canSubmit()) {
+            alert('You can submit answers once every minute.');
+            return;
+        }
+
         const studentId = document.getElementById('student-id').value.trim();
+        const grade = studentGrades[studentId] || 5; // 학번에 따른 등급 조회, 기본값은 5 (0문제 정답처리)
+        const autoCorrectCount = 5 - grade; // 자동으로 정답 처리할 문제 수
+
         const answers = [];
         questions.forEach((_, index) => {
-            answers.push(document.getElementById(`answer-${index}`).value.trim());
+            answers.push(parseFloat(document.getElementById(`answer-${index}`).value.trim()));
         });
 
         let correctCount = 0;
-        const boardState = answers.map((answer, index) => {
-            if (answer.toLowerCase() === correctAnswers[index].toLowerCase()) {
+        const boardState = Array(25).fill(false);
+
+        // 자동 정답 처리
+        for (let i = 0; i < autoCorrectCount; i++) {
+            boardState[i] = true;
+            correctCount++;
+        }
+
+        // 나머지 문제 정답 확인
+        answers.forEach((answer, index) => {
+            if (!boardState[index] && isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
+                boardState[index] = true;
                 correctCount++;
-                return true;
             }
-            return false;
         });
 
         const bingoCount = checkBingo(boardState);
 
-        let grade;
+        let finalGrade;
         if (correctCount === 0) {
-            grade = 'F';
+            finalGrade = 'F';
         } else if (bingoCount === 0) {
-            grade = 'D0';
+            finalGrade = 'D0';
         } else {
-            grade = gradeMapping[bingoCount] || 'F';
+            finalGrade = gradeMapping[bingoCount] || 'F';
         }
 
         const resultData = {
             correctCount: correctCount,
             bingoCount: bingoCount,
-            grade: grade
+            grade: finalGrade
         };
 
         localStorage.setItem('bingoResult', JSON.stringify(resultData));
+        updateLastSubmitTime();
         window.location.href = 'result.html';
     });
 });
