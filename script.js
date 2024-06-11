@@ -77,10 +77,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const bingoCount = checkBingo(boardState);
 
+        let grade;
+        if (correctCount === 0) {
+            grade = 'F';
+        } else if (bingoCount === 0) {
+            grade = 'D0';
+        } else {
+            grade = gradeMapping[bingoCount] || 'F';
+        }
+
         const resultData = {
             correctCount: correctCount,
             bingoCount: bingoCount,
-            grade: gradeMapping[bingoCount] || 'F'
+            grade: grade
         };
 
         localStorage.setItem('bingoResult', JSON.stringify(resultData));
