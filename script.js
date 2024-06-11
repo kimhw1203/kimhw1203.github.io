@@ -1,13 +1,3 @@
-const gradeMapping = {
-    1: 'D+',
-    2: 'C0',
-    3: 'C+',
-    4: 'B0',
-    5: 'B+',
-    6: 'A0',
-    7: 'A+'
-};
-
 const questions = [
     'Question 1', 'Question 2', 'Question 3', 'Question 4', 'Question 5',
     'Question 6', 'Question 7', 'Question 8', 'Question 9', 'Question 10',
@@ -25,12 +15,38 @@ const correctAnswers = [
 ];
 
 const gradeMapping = {
-    'A': 3,
-    'B': 2,
-    'C': 1
+    1: 'D+',
+    2: 'C0',
+    3: 'C+',
+    4: 'B0',
+    5: 'B+',
+    6: 'A0',
+    7: 'A+'
 };
 
-let lastSubmitTime = 0;
+function checkBingo(board) {
+    let bingoCount = 0;
+    // Check rows
+    for (let row = 0; row < 5; row++) {
+        if (board.slice(row * 5, row * 5 + 5).every(val => val)) {
+            bingoCount++;
+        }
+    }
+    // Check columns
+    for (let col = 0; col < 5; col++) {
+        if ([0, 1, 2, 3, 4].every(row => board[row * 5 + col])) {
+            bingoCount++;
+        }
+    }
+    // Check diagonals
+    if ([0, 1, 2, 3, 4].every(i => board[i * 5 + i])) {
+        bingoCount++;
+    }
+    if ([0, 1, 2, 3, 4].every(i => board[i * 5 + (4 - i)])) {
+        bingoCount++;
+    }
+    return bingoCount;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const board = document.getElementById('bingo-board');
@@ -44,36 +60,30 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('quiz-form').addEventListener('submit', function(event) {
         event.preventDefault();
 
-        const currentTime = new Date().getTime();
-        if (currentTime - lastSubmitTime < 60000) {
-            alert('You can submit answers once every minute.');
-            return;
-        }
-
-        lastSubmitTime = currentTime;
-
+        const studentId = document.getElementById('student-id').value.trim();
         const answers = [];
         questions.forEach((_, index) => {
             answers.push(document.getElementById(`answer-${index}`).value.trim());
         });
 
-        fetch('/submit', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                student_id: 'student123',
-                answers: answers
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);
-            } else {
-                document.getElementById('feedback').innerHTML = `You got ${data.correct_count} correct answers.`;
+        let correctCount = 0;
+        const boardState = answers.map((answer, index) => {
+            if (answer.toLowerCase() === correctAnswers[index].toLowerCase()) {
+                correctCount++;
+                return true;
             }
+            return false;
         });
+
+        const bingoCount = checkBingo(boardState);
+
+        const resultData = {
+            correctCount: correctCount,
+            bingoCount: bingoCount,
+            grade: gradeMapping[bingoCount] || 'F'
+        };
+
+        localStorage.setItem('bingoResult', JSON.stringify(resultData));
+        window.location.href = 'result.html';
     });
 });
