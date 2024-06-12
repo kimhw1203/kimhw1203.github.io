@@ -8,6 +8,4 @@ document.addEventListener('DOMContentLoaded', () => {
             <p>You achieved ${resultData.bingoCount} bingo(s): ${resultData.grade}</p>
         `;
     } else {
-        resultDiv.innerHTML = '<p>No results to display.</p>';
-    }
-});
+        resultDiv.innerHTML = '<p>No results to display.</
