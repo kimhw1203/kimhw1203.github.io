@@ -14,20 +14,20 @@ h1 {
     margin-top: 20px;
 }
 
-form, #result {
+form, #result-board, #result-summary {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-#bingo-board {
+#bingo-board, #result-board {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-gap: 10px;
     margin: 20px 0;
 }
 
-#bingo-board div {
+#bingo-board div, .result-cell {
     border: 1px solid #000;
     padding: 10px;
     text-align: center;
@@ -48,4 +48,12 @@ button {
 #feedback {
     margin-top: 20px;
     color: green;
+}
+
+.result-cell {
+    min-width: 80px;
+    min-height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
