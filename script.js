@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
 
         if (!canSubmit()) {
-            alert('You can submit answers once every minute.');
+            alert('30초에 한 번만 제출 가능합니다.');
             return;
         }
 
