@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
 
         if (!canSubmit()) {
-            alert('30초에 한번만 정답 제출 가능합니다.');
+            alert('You can submit answers once every minute.');
             return;
         }
 
@@ -102,18 +102,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let correctCount = 0;
         const boardState = Array(25).fill(false);
+        const resultDetails = Array(25).fill('Incorrect');
 
         // 자동 정답 처리
         for (let i = 0; i < autoCorrectCount; i++) {
             boardState[i] = true;
+            resultDetails[i] = 'Auto Correct';
             correctCount++;
         }
 
         // 나머지 문제 정답 확인
         answers.forEach((answer, index) => {
-            if (!boardState[index] && isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
-                boardState[index] = true;
-                correctCount++;
+            if (!boardState[index]) {
+                if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
+                    resultDetails[index] = `Within Tolerance (Correct: ${correctAnswers[index].answer})`;
+                } else if (answer === correctAnswers[index].answer) {
+                    boardState[index] = true;
+                    resultDetails[index] = 'Correct';
+                    correctCount++;
+                }
             }
         });
 
@@ -131,7 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const resultData = {
             correctCount: correctCount,
             bingoCount: bingoCount,
-            grade: finalGrade
+            grade: finalGrade,
+            resultDetails: resultDetails
         };
 
         localStorage.setItem('bingoResult', JSON.stringify(resultData));
