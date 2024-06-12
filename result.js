@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const resultData = JSON.parse(localStorage.getItem('bingoResult'));
     const resultBoard = document.getElementById('result-board');
+    resultBoard.classList.add('result-board');
     const resultSummary = document.getElementById('result-summary');
 
     if (resultData) {
