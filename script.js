@@ -67,7 +67,7 @@ function canSubmit() {
         return true;
     }
     const currentTime = Date.now();
-    return (currentTime - lastSubmitTime) >= 60000; // 60초 제한
+    return (currentTime - lastSubmitTime) >= 30000; // 60초 제한
 }
 
 function updateLastSubmitTime() {
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
 
         if (!canSubmit()) {
-            alert('You can submit answers once every minute.');
+            alert('30초에 한번만 정답 제출 가능합니다.');
             return;
         }
 
