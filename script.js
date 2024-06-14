@@ -125,6 +125,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // 추가 정답 처리: 사용자가 맞춘 문제 수가 자동 정답 처리 수를 초과할 경우 추가 처리
+        let additionalAutoCorrect = 0;
+        answers.slice(0, 5).forEach((answer, index) => {
+            if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance) || answer === correctAnswers[index].answer) {
+                additionalAutoCorrect++;
+            }
+        });
+        if (additionalAutoCorrect + autoCorrectCount >= 5) {
+            for (let i = 0; i < 5; i++) {
+                if (!boardState[i]) {
+                    boardState[i] = true;
+                    resultDetails[i] = 'Correct (Bonus)';
+                    correctCount++;
+                }
+            }
+        }
         const bingoCount = checkBingo(boardState);
 
         let finalGrade;
