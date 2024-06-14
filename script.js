@@ -116,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!boardState[index]) {
                 if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
                     resultDetails[index] = `Within Tolerance (Correct: ${correctAnswers[index].answer})`;
+                    correctCount++;
                 } else if (answer === correctAnswers[index].answer) {
                     boardState[index] = true;
                     resultDetails[index] = 'Correct';
