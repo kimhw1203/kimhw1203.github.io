@@ -1,5 +1,5 @@
 const questions = [
-    'What is 5 + 5?', 'What is 12 - 5?', 'What is 7 * 3?', 'What is 20 / 4?', 'What is 15 % 4?',
+    'What is 5 + 0.5?', 'What is 12 - 5?', 'What is 7 * 3?', 'What is 20 / 4?', 'What is 15 % 4?',
     'What is 3 + 8?', 'What is 14 - 6?', 'What is 8 * 2?', 'What is 16 / 2?', 'What is 18 % 5?',
     'What is 2 + 3?', 'What is 13 - 7?', 'What is 6 * 2?', 'What is 24 / 6?', 'What is 17 % 3?',
     'What is 4 + 6?', 'What is 11 - 8?', 'What is 9 * 2?', 'What is 30 / 5?', 'What is 22 % 4?',
@@ -7,7 +7,7 @@ const questions = [
 ];
 
 const correctAnswers = [
-    { answer: 10, tolerance: 1 }, { answer: 7, tolerance: 1 }, { answer: 21, tolerance: 2 }, { answer: 5, tolerance: 0.5 }, { answer: 3, tolerance: 0.2 },
+    { answer: 5.5, tolerance: 0.1 }, { answer: 7, tolerance: 1 }, { answer: 21, tolerance: 2 }, { answer: 5, tolerance: 0.5 }, { answer: 3, tolerance: 0.2 },
     { answer: 11, tolerance: 1 }, { answer: 8, tolerance: 1 }, { answer: 16, tolerance: 2 }, { answer: 8, tolerance: 0.5 }, { answer: 3, tolerance: 0.2 },
     { answer: 5, tolerance: 0.5 }, { answer: 6, tolerance: 1 }, { answer: 12, tolerance: 1 }, { answer: 4, tolerance: 0.5 }, { answer: 2, tolerance: 0.2 },
     { answer: 10, tolerance: 1 }, { answer: 3, tolerance: 0.5 }, { answer: 18, tolerance: 1 }, { answer: 6, tolerance: 0.5 }, { answer: 2, tolerance: 0.2 },
@@ -104,16 +104,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const boardState = Array(25).fill(false);
         const resultDetails = Array(25).fill('Incorrect');
 
+        // 첫 5개 문제 정답 확인 및 자동 정답 처리
+        let manualCorrectCount = 0;
+        for (let i = 0; i < 5; i++) {
+            if (isWithinTolerance(answers[i], correctAnswers[i].answer, correctAnswers[i].tolerance)) {
+                resultDetails[i] = `Within Tolerance (Correct: ${correctAnswers[i].answer})`;
+            } else if (answers[i] === correctAnswers[i].answer) {
+                boardState[i] = true;
+                resultDetails[i] = 'Correct';
+                correctCount++;
+                manualCorrectCount++;
+            }
+        }
+        
         // 자동 정답 처리
-        for (let i = 0; i < autoCorrectCount; i++) {
-            boardState[i] = true;
-            resultDetails[i] = 'Auto Correct';
-            correctCount++;
+        let additionalAutoCorrect = Math.min(autoCorrectCount, 5 - manualCorrectCount);
+        for (let i = 0; i < 5 && additionalAutoCorrect > 0; i++) {
+            if (!boardState[i]) {
+                boardState[i] = true;
+                resultDetails[i] = 'Auto Correct';
+                correctCount++;
+                additionalAutoCorrect--;
+            }
         }
 
         // 나머지 문제 정답 확인
         answers.forEach((answer, index) => {
-            if (!boardState[index]) {
+            if (index >= 5 && !boardState[index]) {
                 if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
                     resultDetails[index] = `Within Tolerance (Correct: ${correctAnswers[index].answer})`;
                     correctCount++;
@@ -125,22 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 추가 정답 처리: 사용자가 맞춘 문제 수가 자동 정답 처리 수를 초과할 경우 추가 처리
-        let additionalAutoCorrect = 0;
-        answers.slice(0, 5).forEach((answer, index) => {
-            if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance) || answer === correctAnswers[index].answer) {
-                additionalAutoCorrect++;
-            }
-        });
-        if (additionalAutoCorrect + autoCorrectCount >= 5) {
-            for (let i = 0; i < 5; i++) {
-                if (!boardState[i]) {
-                    boardState[i] = true;
-                    resultDetails[i] = 'Correct (Bonus)';
-                    correctCount++;
-                }
-            }
-        }
         const bingoCount = checkBingo(boardState);
 
         let finalGrade;
