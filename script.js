@@ -104,23 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const boardState = Array(25).fill(false);
         const resultDetails = Array(25).fill('Incorrect');
 
-        // 첫 5개 문제 정답 확인 및 자동 정답 처리
+        // 첫 5개 문제 정답 확인
         let manualCorrectCount = 0;
         for (let i = 0; i < 5; i++) {
             if (isWithinTolerance(answers[i], correctAnswers[i].answer, correctAnswers[i].tolerance)) {
-                resultDetails[i] = `Within Tolerance (Correct: ${correctAnswers[i].answer})`;
-            } else if (answers[i] === correctAnswers[i].answer) {
                 boardState[i] = true;
                 resultDetails[i] = 'Correct';
                 correctCount++;
                 manualCorrectCount++;
             }
         }
-        
+
         // 자동 정답 처리
         let additionalAutoCorrect = Math.min(autoCorrectCount, 5 - manualCorrectCount);
-        for (let i = 0; i < 5 && additionalAutoCorrect > 0; i++) {
-            if (!boardState[i]) {
+        for (let i = 0; i < 5; i++) {
+            if (!boardState[i] && additionalAutoCorrect > 0) {
                 boardState[i] = true;
                 resultDetails[i] = 'Auto Correct';
                 correctCount++;
@@ -132,9 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         answers.forEach((answer, index) => {
             if (index >= 5 && !boardState[index]) {
                 if (isWithinTolerance(answer, correctAnswers[index].answer, correctAnswers[index].tolerance)) {
-                    resultDetails[index] = `Within Tolerance (Correct: ${correctAnswers[index].answer})`;
-                    correctCount++;
-                } else if (answer === correctAnswers[index].answer) {
                     boardState[index] = true;
                     resultDetails[index] = 'Correct';
                     correctCount++;
