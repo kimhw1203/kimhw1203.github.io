@@ -67,7 +67,7 @@ function canSubmit() {
         return true;
     }
     const currentTime = Date.now();
-    return (currentTime - lastSubmitTime) >= 30000; // 60초 제한
+    return (currentTime - lastSubmitTime) >= 3000; // 60초 제한
 }
 
 function updateLastSubmitTime() {
